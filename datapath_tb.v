@@ -68,7 +68,7 @@ always @(Present_state) // do the required job in each state
 				encIn <= 32'h00000004;
 			end
 			Reg_load2b: begin
-				
+				R0in <= 1;
 			end
 			Reg_load3a: begin
 				
