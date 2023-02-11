@@ -1,19 +1,31 @@
+`timescale 1ns/10ps
 module datapath_tb;
-	reg PCout, Zlowout, MDRout, R2out, R3out; // add any other signals to see in your simulation
-	reg MARin, Zin, PCin, MDRin, IRin, Yin;
-	reg IncPC, Read, AND, R1in, R2in, R3in;
-	reg Clock;
+	
+	wire [31:0] R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
+	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY; // add any other signals to see in your simulation
+	
+	reg Read, R0in, R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, 
+	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
+	CSIGNin, MDRin, Yin;
+	
+	//Control Signals for ALU, added to datapath signature before output busMuxOut
+	reg NOT;
+	
+	reg Clock, Clear;
 	reg [31:0] Mdatain;
+	reg [31:0] encIn;
+	wire [31:0] busMuxOut;
 
-
-	parameter Default = 4’b0000, Reg_load1a = 4’b0001, Reg_load1b = 4’b0010, Reg_load2a = 4’b0011,
-				Reg_load2b = 4’b0100, Reg_load3a = 4’b0101, Reg_load3b = 4’b0110, T0 = 4’b0111,
-				T1 = 4’b1000, T2 = 4’b1001, T3 = 4’b1010, T4 = 4’b1011, T5 = 4’b1100;
+	parameter Default = 4'b0000, Reg_load1a = 4'b0001, Reg_load1b = 4'b0010, Reg_load2a = 4'b0011,
+				Reg_load2b = 4'b0100, Reg_load3a = 4'b0101, Reg_load3b = 4'b0110, T0 = 4'b0111,
+				T1 = 4'b1000, T2 = 4'b1001, T3 = 4'b1010, T4 = 4'b1011, T5 = 4'b1100;
 	reg [3:0] Present_state = Default;
 
 
-Datapath DUT(PCout, Zlowout, MDRout, R2out, R4out, MARin, Zin, PCin, MDRin, IRin, Yin, IncPC, Read, AND, R1in,
-			 R2in, R3in, Clock, Mdatain);
+datapath DUT(Mdatain, encIn, Clock, Clear, Read, R0in, R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, 
+	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
+	CSIGNin, MDRin, Yin, R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
+	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, NOT, busMuxOut);
 
 
 
@@ -24,7 +36,7 @@ initial
 	begin
 		Clock = 0;
 		forever #10 Clock = ~ Clock;
-end
+	end
 
 
 always @(posedge Clock) // finite state machine; if clock rising-edge
@@ -52,58 +64,49 @@ always @(Present_state) // do the required job in each state
 	begin
 		case (Present_state) // assert the required signals in each clock cycle
 			Default: begin
-				PCout <= 0; Zlowout <= 0; MDRout <= 0; // initialize the signals
-				R2out <= 0; R3out <= 0; MARin <= 0; Zin <= 0;
-				PCin <=0; MDRin <= 0; IRin <= 0; Yin <= 0;
-				IncPC <= 0; Read <= 0; AND <= 0;
-				R1in <= 0; R2in <= 0; R3in <= 0; Mdatain <= 32’h00000000;
+				// initialize the signals
+				R0in <=0; MDRin <= 0; R1in <= 0; NOT <= 0;
+				Read <= 0; 
+				Mdatain <= 32'h00000000;
+				encIn <= 32'h00000000;
 			end
 			Reg_load1a: begin
-				Mdatain <= 32’h00000012;
-				Read = 0; MDRin = 0; // the first zero is there for completeness
-				#10 Read <= 1; MDRin <= 1;
-				#15 Read <= 0; MDRin <= 0;
+				Mdatain <= 32'h00000012;
 			end
 			Reg_load1b: begin
-				#10 MDRout <= 1; R2in <= 1;
-				#15 MDRout <= 0; R2in <= 0; // initialize R2 with the value $12
+				Read <= 1; MDRin <= 1;
 			end
 			Reg_load2a: begin
-				Mdatain <= 32’h00000014;
-				#10 Read <= 1; MDRin <= 1;
-				#15 Read <= 0; MDRin <= 0;
+				//Push MDR value onto bus
+				encIn <= 32'b00000000001000000000000000000000;
 			end
 			Reg_load2b: begin
-				#10 MDRout <= 1; R3in <= 1;
-				#15 MDRout <= 0; R3in <= 0; // initialize R3 with the value $14
+				R0in <= 1; 
 			end
 			Reg_load3a: begin
-				Mdatain <= 32’h00000018;
-				#10 Read <= 1; MDRin <= 1;
-				#15 Read <= 0; MDRin <= 0;
+				//NOT <= 1; ZLOin <= 1;
+				Yin <= 1;
+				
 			end
 			Reg_load3b: begin
-				#10 MDRout <= 1; R1in <= 1;
-				#15 MDRout <= 0; R1in <= 0; // initialize R1 with the value $18
+				Yin <= 0;
+				
 			end
-			T0: begin // see if you need to de-assert these signals
-				PCout <= 1; MARin <= 1; IncPC <= 1; Zin <= 1;
-			end
+
 			T1: begin
-				Zlowout <= 1; PCin <= 1; Read <= 1; MDRin <= 1;
-				Mdatain <= 32’h28918000; // opcode for “and R1, R2, R3”
+				NOT <= 1; ZLOin <= 1;
 			end
 			T2: begin
-				MDRout <= 1; IRin <= 1;
+			
 			end
 			T3: begin
-				R2out <= 1; Yin <= 1;
+				
 			end
 			T4: begin
-				R3out <= 1; AND <= 1; Zin <= 1;
+				
 			end
 			T5: begin
-				Zlowout <= 1; R1in <= 1;
+				
 			end
 		endcase
 	end
