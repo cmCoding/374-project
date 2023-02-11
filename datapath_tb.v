@@ -9,7 +9,7 @@ module datapath_tb;
 	CSIGNin, MDRin, Yin;
 	
 	//Control Signals for ALU, added to datapath signature before output busMuxOut
-	reg NOT, OR, AND;
+	reg NOT, OR, AND, SHR, SHRA, SHL;
 	
 	reg Clock, Clear;
 	reg [31:0] Mdatain;
@@ -26,7 +26,7 @@ datapath DUT(Mdatain, encIn, Clock, Clear, Read, R0in, R1in, R2in, R3in, R4in, R
 	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
 	CSIGNin, MDRin, Yin, R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
 	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, 
-	NOT, OR, AND, 
+	NOT, OR, AND, SHR, SHRA, SHL,
 	busMuxOut);
 
 
@@ -67,7 +67,9 @@ always @(Present_state) // do the required job in each state
 		case (Present_state) // assert the required signals in each clock cycle
 			Default: begin
 				// initialize the signals
-				R0in <=0; MDRin <= 0; R1in <= 0; NOT <= 0;
+				R0in <=0; MDRin <= 0; R1in <= 0; 
+				NOT <= 0; OR <= 0; AND <= 0; SHR <= 0; SHRA = 0;
+				SHL <= 0;
 				Read <= 0; 
 				Mdatain <= 32'h00000000;
 				encIn <= 32'h00000000;
@@ -105,10 +107,10 @@ always @(Present_state) // do the required job in each state
 				Read <= 0; MDRin <= 0;
 				// One value in Y reg, another on Bus
 				// Therefore, call desired intruction
-				AND <= 1; ZLOin <= 1;
+				SHL <= 1; ZLOin <= 1;
 			end
 			T3: begin
-				AND <= 0; ZLOin <= 0;
+				SHL <= 0; ZLOin <= 0;
 				
 			end
 			T4: begin
