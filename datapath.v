@@ -1,13 +1,15 @@
 module datapath(mdatain, encIn, clk, clr, readMDR, R0in, R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, 
 	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
 	CSIGNin, MDRin, Yin, R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
-	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, NOT, busMuxOut);
+	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, 
+	NOT, OR, AND, 
+	busMuxOut);
 	
 	input [31:0] encIn, mdatain;
 	input clk, clr, readMDR;
 	
 	//Control Signal Inputs
-	input NOT;
+	input NOT, OR, AND;
 	
 	output [31:0] R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
 	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY;
@@ -97,7 +99,7 @@ module datapath(mdatain, encIn, clk, clr, readMDR, R0in, R1in, R2in, R3in, R4in,
 	//Wire from the output of the ALU into the input of ZLO
 	wire [31:0] aluOut;
 	
-	ALU aluUnit(RY, busMuxOut, NOT, aluOut);
+	ALU aluUnit(RY, busMuxOut, NOT, OR, AND, aluOut);
 	
 	input ZHIin;
 	register rZHI(busMuxOut, clr, clk, ZHIin, ZHI);

@@ -9,7 +9,7 @@ module datapath_tb;
 	CSIGNin, MDRin, Yin;
 	
 	//Control Signals for ALU, added to datapath signature before output busMuxOut
-	reg NOT;
+	reg NOT, OR, AND;
 	
 	reg Clock, Clear;
 	reg [31:0] Mdatain;
@@ -25,7 +25,9 @@ module datapath_tb;
 datapath DUT(Mdatain, encIn, Clock, Clear, Read, R0in, R1in, R2in, R3in, R4in, R5in, R6in, R7in, R8in, R9in, R10in, 
 	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
 	CSIGNin, MDRin, Yin, R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
-	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, NOT, busMuxOut);
+	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, 
+	NOT, OR, AND, 
+	busMuxOut);
 
 
 
@@ -71,7 +73,7 @@ always @(Present_state) // do the required job in each state
 				encIn <= 32'h00000000;
 			end
 			Reg_load1a: begin
-				Mdatain <= 32'h00000012;
+				Mdatain <= 32'hFFFF0000;
 			end
 			Reg_load1b: begin
 				Read <= 1; MDRin <= 1;
@@ -81,29 +83,37 @@ always @(Present_state) // do the required job in each state
 				encIn <= 32'b00000000001000000000000000000000;
 			end
 			Reg_load2b: begin
-				R0in <= 1; 
+				//Load into Y register
+				Yin <= 1; 
+				//Set MDRin back to 0
+				Read <= 0; MDRin <= 0;
 			end
-			Reg_load3a: begin
+			Reg_load3a: begin			// Begin loading 2nd value onto bus for ALU operation
 				//NOT <= 1; ZLOin <= 1;
-				Yin <= 1;
-				
+				Yin <= 0;
+				Mdatain <= 32'h0000FFFF;
 			end
 			Reg_load3b: begin
-				Yin <= 0;
-				
+				Read <= 1; MDRin <= 1;
 			end
 
 			T1: begin
-				NOT <= 1; ZLOin <= 1;
+				encIn <= 32'b00000000001000000000000000000000;
 			end
 			T2: begin
-			
+				//Reset MDR
+				Read <= 0; MDRin <= 0;
+				// One value in Y reg, another on Bus
+				// Therefore, call desired intruction
+				AND <= 1; ZLOin <= 1;
 			end
 			T3: begin
+				AND <= 0; ZLOin <= 0;
 				
 			end
 			T4: begin
-				
+				//Push result of ZLO onto Bus
+				encIn <= 32'b00000000000010000000000000000000;
 			end
 			T5: begin
 				
