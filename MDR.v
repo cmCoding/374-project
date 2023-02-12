@@ -1,10 +1,11 @@
+
 module mux2to1(BusMuxOut, Mdatain, Read, out);
 	input [31:0] BusMuxOut, Mdatain;
 	input Read;
 	output reg [31:0] out;
 	
 	
-	always @(Read)
+	always @(Read or BusMuxOut or Mdatain)
 	begin
 		if (Read == 0)
 			out = BusMuxOut;
@@ -46,4 +47,3 @@ module MDRUnit(inBus, inData, read, clear, clk, MDRin, MDRout);
 	MDR MDRreg(connector, clear, clk, MDRin, MDRout);
 	
 endmodule
-	
