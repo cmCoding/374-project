@@ -9,7 +9,7 @@ module datapath_tb;
 	CSIGNin, MDRin, Yin;
 	
 	//Control Signals for ALU, added to datapath signature before output busMuxOut
-	reg NOT, OR, AND, SHR, SHRA, SHL;
+	reg NOT, OR, AND, SHR, SHRA, SHL, ADD, NEG, SUB, ROR, ROL, DIV, MUL;
 	
 	reg Clock, Clear;
 	reg [31:0] Mdatain;
@@ -26,7 +26,7 @@ datapath DUT(Mdatain, encIn, Clock, Clear, Read, R0in, R1in, R2in, R3in, R4in, R
 	R11in, R12in, R13in, R14in, R15in, HIin, LOin, ZHIin, ZLOin, PCin, INPORTin,
 	CSIGNin, MDRin, Yin, R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,R14,R15,HI,
 	LO,ZHI,ZLO,PC,MDR,INPORT,CSIGN, RY, 
-	NOT, OR, AND, SHR, SHRA, SHL,
+	NOT, OR, AND, SHR, SHRA, SHL, ADD, NEG, SUB, ROR, ROL, DIV, MUL,
 	busMuxOut);
 
 
@@ -68,14 +68,15 @@ always @(Present_state) // do the required job in each state
 			Default: begin
 				// initialize the signals
 				R0in <=0; MDRin <= 0; R1in <= 0; 
-				NOT <= 0; OR <= 0; AND <= 0; SHR <= 0; SHRA = 0;
-				SHL <= 0;
+				NOT <= 0; OR <= 0; AND <= 0; SHR <= 0; SHRA <= 0;
+				SHL <= 0; ADD <= 0; NEG <= 0; SUB <= 0; ROR <= 0; ROL <= 0; DIV <= 0; MUL <= 0;
 				Read <= 0; 
 				Mdatain <= 32'h00000000;
 				encIn <= 32'h00000000;
 			end
 			Reg_load1a: begin
-				Mdatain <= 32'hFFFF0000;
+				//Load first value
+				Mdatain <= 32'hFFFFFFFF;
 			end
 			Reg_load1b: begin
 				Read <= 1; MDRin <= 1;
@@ -93,7 +94,7 @@ always @(Present_state) // do the required job in each state
 			Reg_load3a: begin			// Begin loading 2nd value onto bus for ALU operation
 				//NOT <= 1; ZLOin <= 1;
 				Yin <= 0;
-				Mdatain <= 32'h0000FFFF;
+				Mdatain <= 32'b00000000000000000000000000000010;
 			end
 			Reg_load3b: begin
 				Read <= 1; MDRin <= 1;
@@ -107,10 +108,10 @@ always @(Present_state) // do the required job in each state
 				Read <= 0; MDRin <= 0;
 				// One value in Y reg, another on Bus
 				// Therefore, call desired intruction
-				SHL <= 1; ZLOin <= 1;
+				MUL <= 1; ZLOin <= 1; ZHIin <= 1;
 			end
 			T3: begin
-				SHL <= 0; ZLOin <= 0;
+				MUL <= 0; ZLOin <= 0; ZHIin <= 0;
 				
 			end
 			T4: begin

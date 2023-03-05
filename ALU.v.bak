@@ -135,8 +135,8 @@ module ALU(RY,
 	wire [31:0] remainder;
 	reg divSig;
 	
-	
 	wire [63:0] mulOut;
+	
 	
 	
 	
@@ -147,7 +147,7 @@ module ALU(RY,
 	NEGATE negMod(BUSin,coutNeg,negOut);
 	subtract s1(RY,BUSin,coutSub,subOut);
 	division d1(RY,BUSin,divOut, remainder);
-	mul_32_bit mp(RY,BUSin,mulOut);
+	boothmul mp(RY,BUSin,mulOut);
 	
 	always @(NOT or OR or AND or BUSin or RY or SHR or SHRA or SHL or ADD or NEG or SUB or ROR or ROL or DIV or MUL)
 	begin
