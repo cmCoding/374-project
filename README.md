@@ -1,1 +1,1 @@
-# 374-project
+Simple RISC Computer (Mini SRC) using Intel Quartus II design software; a comprehensive system in Verilog, incorporating a simple RISC processor, memory system, and input/output modules, allowing for the step-by-step visualization of processes..
